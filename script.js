@@ -143,10 +143,18 @@ function shoot(shooter,target,isAI=false){
     checkState();
 
     if(!gameOver){
-      if(!keepTurn) currentTurn=shooter==="player"?"ai":"player";
-      if(currentTurn==="ai") setTimeout(aiTurn,900);
-      if(currentTurn==="player") showButtons();
+      if(!keepTurn) currentTurn = shooter==="player" ? "ai" : "player";
+
+      if(currentTurn === "ai"){
+        hideButtons();                 // ⭐ AI 턴 시작 → 버튼 숨김
+        setTimeout(aiTurn, 900);
+      }
+
+      if(currentTurn === "player"){
+        showButtons();                 // ⭐ 플레이어 턴만 버튼 표시
+      }
     }
+
 
   },500);
 }
@@ -231,7 +239,15 @@ function aiUseItem(item){
 // AI 턴
 function aiTurn(){
   if(gameOver) return;
-  if(ai.skipNextTurn){ ai.skipNextTurn=false; currentTurn="player"; showButtons(); return; }
+
+  hideButtons();
+
+  if(ai.skipNexTurn){
+    ai.skipNextTurn = false;
+    currentTurn = "player";
+    showButtons();
+    return;
+  }
 
   if(round>=2 && Math.random()<0.5){
     const itemPool=[
@@ -283,3 +299,4 @@ aiBtn.onclick=()=>{ if(currentTurn==="player") shoot("player","ai"); };
 
 // 시작
 setupRound();
+
