@@ -7,6 +7,7 @@ let ammoTimeout = null;
 let gameOver = false;
 let playerItems = [];
 let aiItems = [];
+let isShooting = false;
 
 // DOM
 const playerHeartsEl = document.getElementById("playerHearts");
@@ -17,7 +18,7 @@ const message = document.getElementById("message");
 const selfBtn = document.getElementById("selfBtn");
 const aiBtn = document.getElementById("aiBtn");
 const itemButtonsDiv = document.getElementById("itemButtons");
-
+const SHOOT_DELAY = 900;
 // UI
 function renderHearts(character, container) {
   container.innerHTML = "";
@@ -85,10 +86,22 @@ function loadAmmo(){
 // 발사
 function shoot(shooter,target,isAI=false){
   if(gameOver) return;
+  if(isShooting) return;
+
+  isShooting = true;
+  hideButtons();
 
   if(ammo.length===0){
     loadAmmo();
-    if(isAI) setTimeout(()=>{ if(!gameOver) aiTurn(); },500);
+
+    setTimeout(()=> {
+      isShooting = false;
+      if(!gameOver && currentTurn==="player"){
+        showButtons();
+      }
+      
+    }, SHOOT_DELAY);
+    
     return;
   }
 
@@ -150,10 +163,16 @@ function shoot(shooter,target,isAI=false){
         setTimeout(aiTurn, 900);
       }
 
-      if(currentTurn === "player"){
-        showButtons();                 // ⭐ 플레이어 턴만 버튼 표시
-      }
+      //if(currentTurn === "player"){
+      //  showButtons();                 // ⭐ 플레이어 턴만 버튼 표시
+      //}
     }
+    setTimeout(() => {
+      isShooting = false;
+      if(!gameOver && currentTurn==="player"){
+        showButtons();
+      }
+    }, SHOOT_DELAY);
 
 
   },500);
@@ -242,7 +261,7 @@ function aiTurn(){
 
   hideButtons();
 
-  if(ai.skipNexTurn){
+  if(ai.skipNextTurn){
     ai.skipNextTurn = false;
     currentTurn = "player";
     showButtons();
@@ -294,9 +313,17 @@ function shuffle(arr){
 }
 
 // 버튼
-selfBtn.onclick=()=>{ if(currentTurn==="player") shoot("player","player"); };
-aiBtn.onclick=()=>{ if(currentTurn==="player") shoot("player","ai"); };
+selfBtn.onclick=()=>{
+  if(currentTurn==="player" && !isShooting)
+    shoot("player","player");
+};
+
+aiBtn.onclick=()=>{
+  if(currentTurn==="player" && !isShooting)
+    shoot("player","ai");
+};
 
 // 시작
 setupRound();
+
 
