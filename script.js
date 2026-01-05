@@ -8,6 +8,7 @@ let gameOver = false;
 let playerItems = [];
 let aiItems = [];
 let isShooting = false;
+let aiThinkingTimer = null;
 
 // DOM
 const playerHeartsEl = document.getElementById("playerHearts");
@@ -59,6 +60,22 @@ function updateUI(showAmmo = false) {
   renderPlayerItems();
 }
 
+function showAiThinking(){
+  let dots = 0;
+  message.textContent = "🤔 AI 생각 중";
+
+  aiThinkingTimer = setInterval(() => {
+    dots = (dots + 1)  % 4;
+    message.textContent = "🤔 AI 생각 중" + ".".repeat(dots);
+  }, 300);
+}
+
+function hideAiThinking(){
+  if(aiThinkingTimer){
+    clearInterval(aiThinkingTimer);
+    aiThinkingTimer = null;
+  }
+}
 // 아이템 버튼
 function renderPlayerItems(){
   itemButtonsDiv.innerHTML="";
@@ -160,7 +177,12 @@ function shoot(shooter,target,isAI=false){
 
       if(currentTurn === "ai"){
         hideButtons();                 // ⭐ AI 턴 시작 → 버튼 숨김
-        setTimeout(aiTurn, 900);
+        showAiThinking();
+
+        setTimeout(() => {
+          hideAiThinking();
+          aiTurn();
+        }, 900);
       }
 
       //if(currentTurn === "player"){
@@ -262,6 +284,7 @@ function aiTurn(){
   hideButtons();
 
   if(ai.skipNextTurn){
+    hideAiThinking();
     ai.skipNextTurn = false;
     currentTurn = "player";
     showButtons();
@@ -325,5 +348,6 @@ aiBtn.onclick=()=>{
 
 // 시작
 setupRound();
+
 
 
